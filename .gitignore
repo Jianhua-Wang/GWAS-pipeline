@@ -1,0 +1,7 @@
+.git/
+.nextflow*
+work/
+/output/*
+/input/*
+.DS_Store
+._*
