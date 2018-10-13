@@ -11,7 +11,7 @@ EOL=chr(10)
 
 
 if len(sys.argv)<=1:
-    sys.argv="showmaf.py $hwe  $base".split()
+    sys.argv="showmaf.py $hwe $base $cut_hwe".split()
 
 # We don't draw a Manhatten plot at the moment -- would be interesting to see if there are regions
 # that are problematic -- problem is that the .hwe file doesn't have base position so we'd need to change
@@ -69,6 +69,7 @@ def getPic(frm,test,pdfout):
    hwe = np.sort(hwe)
    n = np.arange(1,len(hwe)+1) / np.float(len(hwe))
    ax.step(hwe,n)
+   plt.axvline(x=float(sys.argv[3]),linewidth=0.5,color='r',linestyle='dashed')
    ax.set_xlabel("HWE p score",fontsize=14)
    ax.set_ylabel("Proportion of SNPs with HWE p-value or less",fontsize=14)
    ax.set_title("Cumulative prop. of SNPs with HWE or less",fontsize=16)
