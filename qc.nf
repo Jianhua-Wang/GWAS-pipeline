@@ -1,8 +1,8 @@
 #!/usr/bin/env nextflow
 
 /*
- * Authors: Jianhua Wang
- * Date:    09-29-2018
+ * Author:   Jianhua Wang
+ * Date  :   09-29-2018
  *
  *
  * This is a pipeline for GWAS QC
@@ -40,7 +40,7 @@ Channel
     .fromFilePairs("${inpat}.{bed,bim,fam}",size:3, flat : true){ file -> file.baseName }\
     .ifEmpty { error "No matching plink files" }\
     .map { a -> [checker(a[1]), checker(a[2]), checker(a[3])] }\
-    .separate(raw_ch, bim_ch) { a -> [a,a[1]] }
+    .separate(raw_ch, bim_ch) { a -> [a,a] }
 
 
 /*
@@ -54,16 +54,16 @@ Channel
 process getDuplicateMarkers {
     publishDir params.output_dir, pattern: "*dups", overwrite:true, mode:'copy'
     input:
-        file(inpfname) from bim_ch
+        set file(bed), file(bim), file(fam) from bim_ch
 
     output:
         file("${base}.dups") into duplicates_ch
         file("${base}.dups") into report["dups"]
 
     script:
-        base     = inpfname.baseName
+        base = bed.baseName
         outfname = "${base}.dups"
-        template "dups.py"
+        template "getdups.py"
 }
 
 // Romove the duplicated variants and generate basename-nd{.bed,.bim,.fam}

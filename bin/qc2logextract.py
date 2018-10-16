@@ -16,7 +16,7 @@ txt = '''Remove\tDue to\tFiles
 '''%(len(badsex.readlines())-1,sys.argv[5],sys.argv[6],sys.argv[1],len(fail_IBD.readlines())-1,sys.argv[7],sys.argv[2],len(fail_het.readlines())-1,sys.argv[8],sys.argv[3])
 
 def load_df(file):
-    return(pd.read_csv(file,delim_whitespace=True,usecols=['FID','IID']))
+    return(pd.read_csv(file,delim_whitespace=True,usecols=['FID','IID'],dtype={'IID':str}))
 
 pd.concat([load_df(sys.argv[1]),load_df(sys.argv[2]),load_df(sys.argv[3])],ignore_index=True).sort_values('FID').drop_duplicates().to_csv(sys.argv[4]+'.irem',sep='\t',index=False)
 

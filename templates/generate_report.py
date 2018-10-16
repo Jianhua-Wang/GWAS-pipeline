@@ -146,7 +146,7 @@ navigation = """
                     <a href="#M6">2.5  Phase 2 summary</a>
                 </li>
                 <li>
-                    <a href="#M7">3.1  Individuals with dadsex</a>
+                    <a href="#M7">3.1  Individuals with badsex</a>
                 </li>
                 <li>
                     <a href="#M8">3.2  PCA</a>
@@ -394,7 +394,7 @@ table_html(dftohtml(maf_df),'"M4.1"','MAF counts')+\
 png_html(pngtobase64(hwe_png),'"M5"','2.4 HWE')+\
 png_html(pngtobase64(hwe_qq_png),'"M5.1"','HWE QQ plot')+\
 table_html(dftohtml(qc1_out),'"M6"','2.5 Phase 2 summary')+\
-table_html(dftohtml(badsex_df),'"M7"','3.1 Individuals with dadsex')+\
+table_html(dftohtml(badsex_df),'"M7"','3.1 Individuals with badsex')+\
 png_html(pngtobase64(pca_png),'"M8"','3.2 PCA')+\
 table_html(dftohtml(fail_IBD),'"M9"','3.3 Individual fail IBD')+\
 png_html(pngtobase64(miss_het_png),'"M10"','3.4 Check het')+\

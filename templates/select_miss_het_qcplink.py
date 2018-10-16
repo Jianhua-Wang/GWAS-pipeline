@@ -16,7 +16,7 @@ hetf = sys.argv[1]
 outfname = sys.argv[2]
 times_of_meanhet = sys.argv[3]
 times_of_meanhet = float(times_of_meanhet)
-het      = read_csv(hetf,delim_whitespace=True)
+het      = read_csv(hetf,delim_whitespace=True,dtype={'IID':str})
 mean_het = (het["N(NM)"]-het["O(HOM)"])/het["N(NM)"]
 cut_het_high = mean_het.mean()+times_of_meanhet*mean_het.std()
 cut_het_low = mean_het.mean()-times_of_meanhet*mean_het.std()
