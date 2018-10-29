@@ -8,7 +8,7 @@
  * This is a pipeline for GWAS QC
  */
 
-
+import sun.nio.fs.UnixPath;
 
 inpat = "${params.input_dir}/${params.input_pat}"
 
@@ -27,6 +27,13 @@ bim_ch       = Channel.create()
 report = new LinkedHashMap()
 repnames = ["dups","basic","snpmisspng","indmisspng","initmaf","inithwe","mafpng","hwepng","misshet","snpmiss","failedsex","misshetremf","pca","related","qc1","qc2"]
 repnames.each { report[it] = Channel.create() }
+
+// pca ref files
+pca_ref = "${params.pca_ref_dir}/${params.pca_ref_pat}"
+pca_ref_ch = Channel.fromFilePairs("${pca_ref}.{bed,bim,fam}", size:3, flat : true){ file -> file.baseName }\
+                    .ifEmpty { error "No matching pca-ref files" }\
+                    .map { a -> [checker(a[1]), checker(a[2]), checker(a[3])] }
+pop_file_ch = Channel.fromPath(params.population_file)
 
 // Checks if the file exists
 checker = { fn ->
@@ -231,6 +238,7 @@ process removeQCPhase1 {
 process compPCA {
     input:
         file plinks from qc2A_ch
+        set file(ref_bed), file(ref_bim), file(ref_fam) from pca_ref_ch
 
     output:
         set file ("${prune}.eigenval"), file("${prune}.eigenvec") into pcares
@@ -240,7 +248,8 @@ process compPCA {
         prune= "${base}-prune".replace(".","_")
         """
         plink --bfile ${base} --indep-pairwise 100 20 0.2 --out check
-        plink --bfile ${base} --extract check.prune.in --make-bed --out $prune
+        plink --bfile ${base} --bmerge ${ref_bed} ${ref_bim} ${ref_fam} \
+        --extract check.prune.in --make-bed --out $prune
         plink --bfile ${prune} --pca --out $prune  
         """
 }
@@ -249,6 +258,7 @@ process compPCA {
 process drawPCA {
     input:
         set file(eigvals), file(eigvecs) from pcares
+        file pop_file from pop_file_ch
 
     output:
         file (output) into report["pca"]
