@@ -10,6 +10,14 @@
 
 import sun.nio.fs.UnixPath;
 
+// Checks if the file exists
+checker = { fn ->
+    if (fn.exists())
+        return fn;
+    else
+        error("\n\n-----------------\nFile $fn does not exist\n\n---\n")
+}
+
 inpat = "${params.input_dir}/${params.input_pat}"
 
 f_lo_male = params.f_lo_male
@@ -29,19 +37,15 @@ repnames = ["dups","basic","snpmisspng","indmisspng","initmaf","inithwe","mafpng
 repnames.each { report[it] = Channel.create() }
 
 // pca ref files
+pca_ref_ch = Channel.create()
+pop_ch = Channel.create()
 pca_ref = "${params.pca_ref_dir}/${params.pca_ref_pat}"
-pca_ref_ch = Channel.fromFilePairs("${pca_ref}.{bed,bim,fam}", size:3, flat : true){ file -> file.baseName }\
-                    .ifEmpty { error "No matching pca-ref files" }\
-                    .map { a -> [checker(a[1]), checker(a[2]), checker(a[3])] }
-pop_file_ch = Channel.fromPath(params.population_file)
+Channel
+    .fromFilePairs("${pca_ref}.{bed,bim,fam}", size:3, flat : true){ file -> file.baseName }\
+    .ifEmpty { error "No matching pca-ref files" }\
+    .map { a -> [checker(a[1]), checker(a[2]), checker(a[3])] }
+    .separate(pca_ref_ch, pop_ch) { a -> [a,a[2]] }
 
-// Checks if the file exists
-checker = { fn ->
-    if (fn.exists())
-        return fn;
-    else
-        error("\n\n-----------------\nFile $fn does not exist\n\n---\n")
-}
 
 Channel
     .fromFilePairs("${inpat}.{bed,bim,fam}",size:3, flat : true){ file -> file.baseName }\
@@ -258,14 +262,13 @@ process compPCA {
 process drawPCA {
     input:
         set file(eigvals), file(eigvecs) from pcares
-        file pop_file from pop_file_ch
+        file pop_file from pop_ch
 
     output:
         file (output) into report["pca"]
         
     script:
         base=eigvals.baseName
-        // also relies on "col" defined above
         output="${base}-pca".replace(".","_")+".png"
         template "drawPCA.py"
 }
