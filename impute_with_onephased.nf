@@ -130,7 +130,7 @@ imputeChromChunckChannel = plink_gen_ch.flatMap { chromosome, gensFile, sampleFi
 
 // 3. imputation
 process impute2 {
-  maxForks 4
+  maxForks params.maxForks
   validExitStatus 0,1,2
   errorStrategy 'ignore'
 
