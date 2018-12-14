@@ -4,8 +4,8 @@
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
-import matplotlib.patches as mpatches
-from matplotlib.ticker import MaxNLocator
+# import matplotlib.patches as mpatches
+# from matplotlib.ticker import MaxNLocator
 import pandas as pd
 import numpy as np
 import argparse
@@ -14,75 +14,53 @@ import sys
 EOL=chr(10)
 gap = EOL*3
 
-colour_choices=["black","magenta","darkcyan","red","blue","orange","aqua","beige","chartreuse","darkblue","gold","indigo","ivory","olive","sienna","wheat","salmon","orangered","silver","tan","grey","lightblue","violet","yellow","turquoise", "yellowgreen","khaki","goldenrod","aquamarine","azure","brown","crimson","fuchsia"]
-
 def parseArguments():
-   if len(sys.argv)<=1:
-      sys.argv=\
-      "drawPCA.py $base $eigvals $eigvecs $output".split()
-   parser=argparse.ArgumentParser()
-   parser.add_argument('input', type=str, metavar='input'),
-   parser.add_argument('eigvals', type=str, metavar='label'),
-   parser.add_argument('eigvecs', type=str, metavar='output'),
-   parser.add_argument('output', type=str, metavar='output'),
-   args = parser.parse_args()
-   return args
-
-
-# def getColours():
-#     if len(args.cc_fname)==0 or args.cc_fname=="0":
-#         return [], "black"
-#     phe = pd.read_csv(args.cc,delim_whitespace=True)
-#     all_labels = phe[args.column].unique()
-#     all_labels.sort()
-#     colours = colour_choices
-#     while len(all_labels) > len(colours):
-#        colours=colours+colour_choices
-#     the_colour_choices = dict(zip(all_labels,colours[:len(all_labels)]))
-#     def our_colour(x):
-#         try:
-#            result = the_colour_choices[x[args.column]]
-#         except:
-#            sys.exit(gap+"There's a problem with the phenotype file <%s>, column <%s>, ID <%s>%s"%(args.cc,args.column,x,gap))
-#         return result
-#     the_colours = phe.apply(our_colour,axis=1)
-#     return list(enumerate(all_labels)), the_colours
-
-
-def getEigens():
-    evals = np.loadtxt(args.eigvals)
-    pc1 = 100*evals[0]/evals[:10].sum()
-    pc2 = 100*evals[1]/evals[:10].sum()
-    evecs  = pd.read_csv(args.eigvecs, delim_whitespace=True, header=None)
-    return pc1, pc2, evecs
-
-col_names=['FID','IID']+list(map(lambda x: "PC%d"%x,range(1,21)))
-
-
-def draw(pc1,pc2,evecs,labels,the_colours):
-   fig, ax = plt.subplots(figsize=(10,8))
-   font = {'family' : 'normal','weight' : 'bold','size'   : 14}
-   matplotlib.rc('font', **font)
-   matplotlib.rcParams['xtick.labelsize']=13
-   matplotlib.rcParams['ytick.labelsize']=13
-   locator = MaxNLocator(nbins=5) 
-   ax.xaxis.set_major_locator(locator)
-   ax.scatter(evecs[2],evecs[3],s=1,c=the_colours)
-   ax.legend(scatterpoints=1)
-   recs=[]
-   classes=[]
-#    for (i,label) in labels:
-#       recs.append(mpatches.Rectangle((0,0),1,1,fc=colour_choices[i]))
-#       classes.append(label)
-   plt.legend(recs,classes,loc=4)
-   plt.xlabel("PC1 (variation %4.1f %%)"%pc1,fontsize=15)
-   plt.ylabel("PC2 (variation %4.1f %%)"%pc2,fontsize=15)
-   plt.tight_layout()
-   plt.savefig(args.output,type="png")
-
-
-
+    if len(sys.argv)<=1:
+        sys.argv=\
+        "drawPCA.py $base $eigvals $eigvecs $output $pop_file".split()
+    parser=argparse.ArgumentParser()
+    parser.add_argument('input', type=str, metavar='input'),
+    parser.add_argument('eigvals', type=str, metavar='label'),
+    parser.add_argument('eigvecs', type=str, metavar='output'),
+    parser.add_argument('output', type=str, metavar='output'),
+    parser.add_argument('pop_file',type=str, metavar='pop_file')
+    args = parser.parse_args()
+    return args
 args = parseArguments()
-labels, the_colours = [], "black"
-evecs =  getEigens()
-draw(*evecs,labels,the_colours)
+
+evals = np.loadtxt(args.eigvals)
+pc1 = 100*evals[0]/evals[:10].sum()
+pc2 = 100*evals[1]/evals[:10].sum()
+
+df = pd.read_csv(args.eigvecs,delim_whitespace=True,names=list(range(22)))
+top_2 = df[[0,1,2,3]]
+
+pop_df = pd.read_csv(args.pop_file,delim_whitespace=True,names=[1,2,3,4,5,6])
+merge_df = top_2.merge(pop_df,left_on=1,right_on=2,how='outer')
+merge_df = merge_df.fillna(value='CHIMGEN')
+
+sample_df = merge_df[merge_df[6] == 'CHIMGEN']
+ceu_df = merge_df[merge_df[6] == 3]
+chb_df = merge_df[merge_df[6] == 4]
+jpt_df = merge_df[merge_df[6] == 5]
+yri_df = merge_df[merge_df[6] == 6]
+
+fig = plt.figure(figsize=(10,8))
+fig,ax = plt.subplots()
+matplotlib.rcParams['ytick.labelsize']=10
+matplotlib.rcParams['xtick.labelsize']=10
+ax.scatter(chb_df['2_x'],chb_df['3_x'],s=20,label='CHB',facecolors='none',edgecolors='#26baee',linewidths=0.3)
+ax.scatter(ceu_df['2_x'],ceu_df['3_x'],s=20,label='CEU',facecolors='none',edgecolors='#ff9234',linewidths=0.3)
+ax.scatter(jpt_df['2_x'],jpt_df['3_x'],s=20,label='JPT',facecolors='none',edgecolors='#26baee',linewidths=0.3)
+ax.scatter(yri_df['2_x'],yri_df['3_x'],s=20,label='YRI',facecolors='none',edgecolors='g',linewidths=0.3)
+ax.scatter(sample_df['2_x'],sample_df['3_x'],s=20,label='CHIMGEN',facecolors='none',edgecolors='#f38181',linewidths=0.3)
+ax.set_xlabel("PC1 (variation %4.1f %%)"%pc1,fontsize=14)
+ax.set_ylabel("PC2 (variation %4.1f %%)"%pc2,fontsize=14)
+# plt.xlim(-0.1, 0.6)
+# plt.ylim(-0.6, 0.1)
+# plt.xticks([0.0,0.1,0.2,0.3,0.4,0.5])
+# plt.yticks([-0.5,-0.4,-0.3,-0.2,-0.1,0.0])
+#plt.gca().set_aspect('equal', adjustable='box')
+plt.legend()
+fig.tight_layout()
+fig.savefig(fname=args.output,format='png')
