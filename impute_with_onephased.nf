@@ -138,7 +138,7 @@ process impute2 {
   set val(chromosome), file("${plink_prefix}_chr${chromosome}.gen"), file("${plink_prefix}_chr${chromosome}.sample"), val(chunkStart), val(chunkEnd) from imputeChromChunckChannel
   
   output:
-  set val(chromosome), file("chr${chromosome}-${chunkStart}-${chunkEnd}.imputed") into impute2Chan
+  set val(chromosome), file("chr${chromosome}-${chunkStart}-${chunkEnd}.imputed"), file("chr${chromosome}-${chunkStart}-${chunkEnd}.imputed_info") into impute2Chan
 
   script:
   mapFile    = file( map_dir + sprintf(map_pattern, chromosome) )
@@ -155,6 +155,7 @@ process impute2 {
   -o chr${chromosome}-${chunkStart}-${chunkEnd}.imputed
   if [ ! -f "chr${chromosome}-${chunkStart}-${chunkEnd}.imputed" ]; then
     touch "chr${chromosome}-${chunkStart}-${chunkEnd}.imputed";
+    touch "chr${chromosome}-${chunkStart}-${chunkEnd}.imputed_info";
   fi
 
   """
@@ -188,12 +189,13 @@ process impute2Concat {
   publishDir params.output_dir
  
   input:
-  set val(chromosome), file(imputedFiles) from impute2MapChannel
+  set val(chromosome), file(imputedFiles), file(infoFiles) from impute2MapChannel
 
   output:
   set val(chromosome), file("chr${chromosome}_1KG.imputed") into impute2ConcatChan
 
   """
   cat $imputedFiles > chr${chromosome}_1KG.imputed
+  cat $infoFiles > chr${chromosome}_1KG.imputed_info
   """
 }
