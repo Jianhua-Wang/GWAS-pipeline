@@ -53,6 +53,7 @@ map_pattern           = params.map_pattern
 ref_panel_dir         = params.ref_panel_dir
 ref_hap_pattern       = params.ref_hap_pattern
 ref_leg_pattern       = params.ref_leg_pattern
+ref_sample            = params.ref_sample
 
 /*
  * start pipe
@@ -60,22 +61,80 @@ ref_leg_pattern       = params.ref_leg_pattern
  * 2. Split plink format into .gen by chromosomes
  */
 
-process plink_to_gen {
+process plink {
   //maxForks 4
   input:
   each chromosome from chromosomes_List
   set file(bed), file(bim), file(fam) from plink_ch
 
   output:
-  set val(chromosome), file("${plink_prefix}_chr${chromosome}.gen"), file("${plink_prefix}_chr${chromosome}.sample") into plink_gen_ch
+  set val(chromosome), file("chr${chromosome}.bed"), file("chr${chromosome}.fam"), file("chr${chromosome}.bim") into plinkOutChan
   
   script:
   """
   plink --bfile $plink_prefix \
   --chr $chromosome \
-  --recode oxford \
-  --out ${plink_prefix}_chr$chromosome
+  --make-bed \
+  --out chr$chromosome
   """
+}
+
+process shapeitCheck {
+  validExitStatus 0,1,2
+  errorStrategy 'ignore'
+
+  maxForks params.maxForks
+
+  input:
+  set val(chromosome), file("chr${chromosome}.bed"), file("chr${chromosome}.fam"), file("chr${chromosome}.bim") from plinkOutChan
+
+  output:
+  set val(chromosome), file("chr${chromosome}.alignments.log"), file("chr${chromosome}.alignments.snp.strand.exclude"), file("chr${chromosome}.bed"), file("chr${chromosome}.fam"), file("chr${chromosome}.bim") into shapitCheckChan
+
+  script:
+  hapFile = file( ref_panel_dir + sprintf(ref_hap_pattern, chromosome) )
+  legendFile = file( ref_panel_dir + sprintf(ref_leg_pattern, chromosome) )
+  sampleFile = file( params.ref_panel_dir + params.ref_sample )
+  mapFile    = file( params.map_dir + sprintf(params.map_pattern, chromosome) )
+
+  """
+  shapeit \
+  -check \
+  -M ${mapFile} \
+  --input-bed chr${chromosome}.bed chr${chromosome}.bim chr${chromosome}.fam \
+  --input-ref $hapFile $legendFile $sampleFile \
+  --output-log chr${chromosome}.alignments
+  """
+
+}
+
+process shapeit {
+
+  maxForks params.maxForks
+
+  input:
+  set val(chromosome), file("chr${chromosome}.alignments.log"), file("chr${chromosome}.alignments.snp.strand.exclude"), file("chr${chromosome}.bed"), file("chr${chromosome}.fam"), file("chr${chromosome}.bim") from shapitCheckChan
+
+  output:
+  set val(chromosome), file("chr${chromosome}.phased.haps"), file("chr${chromosome}.phased.sample") into shapeitChan
+
+  script:
+  hapFile = file( ref_panel_dir + sprintf(ref_hap_pattern, chromosome) )
+  legendFile = file( ref_panel_dir + sprintf(ref_leg_pattern, chromosome) )
+  sampleFile = file( params.ref_panel_dir + params.ref_sample )
+  mapFile    = file( params.map_dir + sprintf(params.map_pattern, chromosome) )
+  excludeFile = "chr${chromosome}.alignments.snp.strand.exclude"
+
+  """
+  shapeit \
+  --input-bed chr${chromosome}.bed chr${chromosome}.bim chr${chromosome}.fam \
+  --input-ref $hapFile $legendFile $sampleFile \
+  --exclude-snp $excludeFile \
+  --input-map $mapFile \
+  -O chr${chromosome}.phased \
+  --force
+  """
+
 }
 
 def getChromosomeSize( chromosomeSizesFile, chromosome ) {
@@ -116,7 +175,7 @@ def getChromosomeChunkPairs ( chromosomeSize, chunkSize=5000000 ) {
   result
 }
 
-imputeChromChunckChannel = plink_gen_ch.flatMap { chromosome, gensFile, sampleFile ->
+imputeChromChunckChannel = shapeitChan.flatMap { chromosome, gensFile, sampleFile ->
    def results = []
    
    def chunks = getChromosomeChunkPairs(getChromosomeSize(file(params.chromosomeSizesFile), chromosome))
@@ -135,7 +194,7 @@ process impute2 {
   errorStrategy 'ignore'
 
   input:
-  set val(chromosome), file("${plink_prefix}_chr${chromosome}.gen"), file("${plink_prefix}_chr${chromosome}.sample"), val(chunkStart), val(chunkEnd) from imputeChromChunckChannel
+  set val(chromosome), file("chr${chromosome}.phased.haps"), file("chr${chromosome}.phased.sample"), val(chunkStart), val(chunkEnd) from imputeChromChunckChannel
   
   output:
   set val(chromosome), file("chr${chromosome}-${chunkStart}-${chunkEnd}.imputed") into impute2Chan
@@ -147,10 +206,11 @@ process impute2 {
   legendFile = file( ref_panel_dir + sprintf(ref_leg_pattern, chromosome) )
   """
   impute2 \
+  -use_prephased_g \
+  -known_haps_g chr${chromosome}.phased.haps \
   -m ${mapFile} \
   -h ${hapFile} \
   -l ${legendFile} \
-  -g ${plink_prefix}_chr${chromosome}.gen \
   -int $chunkStart $chunkEnd \
   -Ne 20000 \
   -o chr${chromosome}-${chunkStart}-${chunkEnd}.imputed
