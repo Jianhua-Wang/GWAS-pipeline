@@ -83,7 +83,7 @@ process shapeitCheck {
   validExitStatus 0,1,2
   errorStrategy 'ignore'
 
-  maxForks params.maxForks
+  //maxForks params.maxForks
 
   input:
   set val(chromosome), file("chr${chromosome}.bed"), file("chr${chromosome}.fam"), file("chr${chromosome}.bim") from plinkOutChan
@@ -110,7 +110,7 @@ process shapeitCheck {
 
 process shapeit {
 
-  maxForks params.maxForks
+  //maxForks params.maxForks
 
   input:
   set val(chromosome), file("chr${chromosome}.alignments.log"), file("chr${chromosome}.alignments.snp.strand.exclude"), file("chr${chromosome}.bed"), file("chr${chromosome}.fam"), file("chr${chromosome}.bim") from shapitCheckChan
@@ -189,10 +189,10 @@ imputeChromChunckChannel = shapeitChan.flatMap { chromosome, gensFile, sampleFil
 
 // 3. imputation
 process impute2 {
-  maxForks params.maxForks
+  // maxForks params.maxForks
   validExitStatus 0,1,2
   errorStrategy 'ignore'
-
+  
   input:
   set val(chromosome), file("chr${chromosome}.phased.haps"), file("chr${chromosome}.phased.sample"), val(chunkStart), val(chunkEnd) from imputeChromChunckChannel
   
@@ -269,17 +269,30 @@ infoMapChannel.close()
 // 4. concat impute2 results for per chromosome
 process impute2Concat {
   
-  publishDir params.output_dir, overwrite:true, mode:'copy'
+  publishDir params.output_dir, overwrite:true
  
   input:
   set val(chromosome), file(imputedFiles) from impute2MapChannel
-  set val(chromosome), file(infoFiles) from infoMapChannel
 
   output:
-  set val(chromosome), file("chr${chromosome}_1KG.imputed"), file("chr${chromosome}_1KG.imputed_info") into impute2ConcatChan
+  set val(chromosome), file("chr${chromosome}_1KG.imputed") into impute2ConcatChan
 
   """
   cat $imputedFiles > chr${chromosome}_1KG.imputed
+  """
+}
+
+process impute2infoConcat {
+  
+  publishDir params.output_dir, overwrite:true
+ 
+  input:
+  set val(chromosome), file(infoFiles) from infoMapChannel
+
+  output:
+  set val(chromosome), file("chr${chromosome}_1KG.imputed_info") into impute2infoConcatChan
+
+  """
   cat $infoFiles > chr${chromosome}_1KG.imputed_info
   """
 }
