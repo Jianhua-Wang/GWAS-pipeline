@@ -31,6 +31,7 @@ times_of_meanhet = params.times_of_meanhet
 
 raw_ch       = Channel.create()
 bim_ch       = Channel.create()
+sex_ch       = Channel.create()
 
 report = new LinkedHashMap()
 repnames = ["dups","basic","snpmisspng","indmisspng","initmaf","inithwe","mafpng","hwepng","misshet","snpmiss","failedsex","misshetremf","pca","related","qc1","qc2"]
@@ -51,7 +52,7 @@ Channel
     .fromFilePairs("${inpat}.{bed,bim,fam}",size:3, flat : true){ file -> file.baseName }\
     .ifEmpty { error "No matching plink files" }\
     .map { a -> [checker(a[1]), checker(a[2]), checker(a[3])] }\
-    .separate(raw_ch, bim_ch) { a -> [a,a] }
+    .separate(raw_ch, bim_ch, sex_ch) { a -> [a,a,a] }
 
 
 /*
@@ -109,7 +110,7 @@ process removeDuplicateSNPs {
 // Identify individual discordant sex information
 process identifyIndivDiscSexinfo {
     input:
-        file(plinks) from qc1B_ch
+        file(plinks) from sex_ch
 
     publishDir params.output_dir, overwrite:true, mode:'copy', pattern: "*.badsex"
 

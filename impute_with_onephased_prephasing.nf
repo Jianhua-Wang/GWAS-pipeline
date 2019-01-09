@@ -63,6 +63,7 @@ ref_sample            = params.ref_sample
 
 process plink {
   //maxForks 4
+
   input:
   each chromosome from chromosomes_List
   set file(bed), file(bim), file(fam) from plink_ch
@@ -132,6 +133,7 @@ process shapeit {
   --exclude-snp $excludeFile \
   --input-map $mapFile \
   -O chr${chromosome}.phased \
+  --thread 20 \
   --force
   """
 
@@ -189,7 +191,8 @@ imputeChromChunckChannel = shapeitChan.flatMap { chromosome, gensFile, sampleFil
 
 // 3. imputation
 process impute2 {
-  // maxForks params.maxForks
+  
+  //maxForks 8
   validExitStatus 0,1,2
   errorStrategy 'ignore'
   
