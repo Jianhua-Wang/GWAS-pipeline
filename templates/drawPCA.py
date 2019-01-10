@@ -49,11 +49,12 @@ fig = plt.figure(figsize=(10,8))
 fig,ax = plt.subplots()
 matplotlib.rcParams['ytick.labelsize']=10
 matplotlib.rcParams['xtick.labelsize']=10
-ax.scatter(chb_df['2_x'],chb_df['3_x'],s=20,label='CHB',facecolors='none',edgecolors='#26baee',linewidths=0.3)
-ax.scatter(ceu_df['2_x'],ceu_df['3_x'],s=20,label='CEU',facecolors='none',edgecolors='#ff9234',linewidths=0.3)
-ax.scatter(jpt_df['2_x'],jpt_df['3_x'],s=20,label='JPT',facecolors='none',edgecolors='#26baee',linewidths=0.3)
-ax.scatter(yri_df['2_x'],yri_df['3_x'],s=20,label='YRI',facecolors='none',edgecolors='g',linewidths=0.3)
-ax.scatter(sample_df['2_x'],sample_df['3_x'],s=20,label='CHIMGEN',facecolors='none',edgecolors='#f38181',linewidths=0.3)
+markers = ['o','^','s','p','*']
+flatui = ["#00b8a9", "#D81159","#474f85" , "#84B1ED", "#f38181","#95e1d3","#aa96da"]
+
+for i, item in enumerate(merge_df[6].value_counts().index):
+    ax.scatter(merge_df[merge_df[6]==item]['2_x'],merge_df[merge_df[6]==item]['3_x'],s=30,label=item,linewidths=1,marker=markers[i],alpha=0.3,c=flatui[i])
+
 ax.set_xlabel("PC1 (variation %4.1f %%)"%pc1,fontsize=14)
 ax.set_ylabel("PC2 (variation %4.1f %%)"%pc2,fontsize=14)
 # plt.xlim(-0.1, 0.6)
