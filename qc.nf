@@ -64,7 +64,7 @@ Channel
 
 // Get the duplicated variants from the .bim files
 process getDuplicateMarkers {
-    publishDir params.output_dir, pattern: "*dups", overwrite:true, mode:'copy'
+    publishDir params.output_dir, pattern: "*dups", overwrite:true, mode:'link'
     input:
         set file(bed), file(bim), file(fam) from bim_ch
 
@@ -112,7 +112,7 @@ process identifyIndivDiscSexinfo {
     input:
         file(plinks) from sex_ch
 
-    publishDir params.output_dir, overwrite:true, mode:'copy', pattern: "*.badsex"
+    publishDir params.output_dir, overwrite:true, mode:'link', pattern: "*.badsex"
 
     output:
         file(logfile) into  report["failedsex"]
@@ -212,7 +212,7 @@ process showHWEStats {
 process removeQCPhase1 {
     input:
         set file(bed), file(bim), file(fam) from qc1A_ch
-    publishDir params.output_dir, overwrite:true, mode:'copy', pattern:"*.irem"
+    publishDir params.output_dir, overwrite:true, mode:'link', pattern:"*.irem"
 
     output:
         file("${output}*.{bed,bim,fam}") into (qc2A_ch,qc2B_ch,qc2C_ch,qc2D_ch)
@@ -360,7 +360,7 @@ process removeQCIndivs {
         file (f_sex_check_f) from failed_sex_ch1
         set file(bed), file(bim), file(fam) from qc2D_ch
 
-    publishDir params.output_dir, overwrite:true, mode:'copy',pattern: "*.{bed,bim,fam,irem}"
+    publishDir params.output_dir, overwrite:true, mode:'link',pattern: "*.{bed,bim,fam,irem}"
 
     output:
         file("${out}.{bed,bim,fam}") into (qc3A_ch,qc3B_ch)
@@ -449,7 +449,7 @@ process produceReports {
         file(re_maf) from report["mafpng"]
         file(re_hwe) from report["hwepng"]
 
-    publishDir params.output_dir, overwrite:true, mode:'copy',pattern: "*.html"
+    publishDir params.output_dir, overwrite:true, mode:'link',pattern: "*.html"
     
     output:
         file("${base}-GWAS-QC_report.html") into final_ch

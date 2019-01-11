@@ -28,7 +28,7 @@
 *****        Input Preparation        ***********
 *************************************************/
 
-chromosomes_List = params.chromosomes_List
+chromosomes_List = ['X']
 
 // Checks if the file exists
 checker = { fn ->
@@ -99,6 +99,7 @@ process shapeitCheck {
   """
   shapeit \
   -check \
+  --chrX \
   -M ${mapFile} \
   --input-bed chr${chromosome}.bed chr${chromosome}.bim chr${chromosome}.fam \
   --input-ref $hapFile $legendFile $sampleFile \
@@ -126,6 +127,7 @@ process shapeit {
 
   """
   shapeit \
+  --chrX \
   --input-bed chr${chromosome}.bed chr${chromosome}.bim chr${chromosome}.fam \
   --input-ref $hapFile $legendFile $sampleFile \
   --exclude-snp $excludeFile \
@@ -207,8 +209,10 @@ process impute2 {
   legendFile = file( ref_panel_dir + sprintf(ref_leg_pattern, chromosome) )
   """
   impute2 \
+  -chrX \
   -use_prephased_g \
   -known_haps_g chr${chromosome}.phased.haps \
+  -sample_g chr${chromosome}.phased.sample \
   -m ${mapFile} \
   -h ${hapFile} \
   -l ${legendFile} \
