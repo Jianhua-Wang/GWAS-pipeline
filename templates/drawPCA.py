@@ -40,10 +40,10 @@ merge_df = top_2.merge(pop_df,left_on=1,right_on=2,how='outer')
 merge_df = merge_df.fillna(value='CHIMGEN')
 
 sample_df = merge_df[merge_df[6] == 'CHIMGEN']
-ceu_df = merge_df[merge_df[6] == 3]
-chb_df = merge_df[merge_df[6] == 4]
-jpt_df = merge_df[merge_df[6] == 5]
-yri_df = merge_df[merge_df[6] == 6]
+ceu_df = merge_df[merge_df[6] == 'CEU']
+chb_df = merge_df[merge_df[6] == 'CHB']
+jpt_df = merge_df[merge_df[6] == 'JPT']
+yri_df = merge_df[merge_df[6] == 'YRI']
 
 fig = plt.figure(figsize=(10,8))
 fig,ax = plt.subplots()
