@@ -4,12 +4,6 @@
 
 This is a suit of GWAS workflows for [CHIMGEN]([http://chimgen.tmu.edu.cn](http://chimgen.tmu.edu.cn/)) project built on [NEXTFLOW](<https://www.nextflow.io/>) framework.
 
-<img align="left" src="http://chimgen.tmu.edu.cn/en/theme/default/images/b_logo.png"><img align="left" src="https://www.nextflow.io/img/nextflow2014_no-bg.png">
-
-
-
-
-
 ## Contents
 
 - [Getting started](#4)
@@ -57,7 +51,7 @@ nextflow run qc.nf -c qc.config
 
 This is a pipeline of genotype data quality assessment and control, including variant-level QC and individual-level QC. These steps are critical for the following imputation and association analysis, could reduce the false positive of GWAS results.
 
-I referred to the *Nature Protocols* from [Anderson et al.](<https://www.nature.com/articles/nprot.2010.116>) and a NEXTFLOW workflow from [H3ABioNet](<https://github.com/h3abionet/h3agwas>. I didn't describe the details of every step in this tutorial, but it's very easy to understand the principles on the *Nature Protocols*.
+I referred to the *Nature Protocols* from [Anderson et al.](<https://www.nature.com/articles/nprot.2010.116>) and a NEXTFLOW workflow from [H3ABioNet](<https://github.com/h3abionet/h3agwas>). I didn't describe the details of every step in this tutorial, but it's very easy to understand the principles on the *Nature Protocols*.
 
 ### Input
 
@@ -68,3 +62,4 @@ There are various types of genotype formats, such as PLINK bed, gen, vcf, bgen, 
 ### Output
 
 This pipeline does not only output the clean data but also generate tables of filtered variants and individuals and figures of data assessment. I put the tables and figures in a HTML report to reading easily.
+
