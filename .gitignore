@@ -5,3 +5,5 @@ work/
 /input/*
 .DS_Store
 ._*
+./impute_ref/1000GP_Phase3/1000GP_Phase3_chr*
+./impute_ref/1000GP_Phase3/1000GP_Phase3_chr*

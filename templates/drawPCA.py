@@ -37,9 +37,9 @@ top_2 = df[[0,1,2,3]]
 
 pop_df = pd.read_csv(args.pop_file,delim_whitespace=True,names=[1,2,3,4,5,6])
 merge_df = top_2.merge(pop_df,left_on=1,right_on=2,how='outer')
-merge_df = merge_df.fillna(value='CHIMGEN')
+merge_df = merge_df.fillna(value=args.input[:-11])
 
-sample_df = merge_df[merge_df[6] == 'CHIMGEN']
+sample_df = merge_df[merge_df[6] == args.input[:-11]]
 ceu_df = merge_df[merge_df[6] == 'CEU']
 chb_df = merge_df[merge_df[6] == 'CHB']
 jpt_df = merge_df[merge_df[6] == 'JPT']

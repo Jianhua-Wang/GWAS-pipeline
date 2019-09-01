@@ -109,6 +109,8 @@ process removeDuplicateSNPs {
 
 // Identify individual discordant sex information
 process identifyIndivDiscSexinfo {
+
+
     input:
         file(plinks) from sex_ch
 
@@ -128,7 +130,11 @@ process identifyIndivDiscSexinfo {
         """
         plink --keep-allele-order --bfile $base --hardy --check-sex $f_hi_female $f_lo_male --out $base
         head -n 1 ${base}.sexcheck > $logfile
-        grep  'PROBLEM' ${base}.sexcheck >> $logfile
+        if grep -q 'PROBLEM' ${base}.sexcheck; then
+            grep 'PROBLEM' ${base}.sexcheck >> $logfile
+        else
+            echo '-\t-\t-\t-\t-\t-'
+        fi
         """
 }
 
