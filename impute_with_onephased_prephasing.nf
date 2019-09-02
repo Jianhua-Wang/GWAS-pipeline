@@ -17,10 +17,10 @@
 
 /*
  * 
- * 1. Convert Unphased VCF to .gen.gz by chromosomes
- * 2. Split plink format into .gen by chromosomes
- * 3. Imputation with every 5,000,000 BP
- * 4. Concat imputation results
+ * 1. Split plink format into .gen by chromosomes
+ * 2. Imputation with every 5,000,000 BP
+ * 3. Concat imputation results
+ * 4. Convert gen file to bgen file
  *
  */
 
@@ -57,8 +57,7 @@ ref_sample            = params.ref_sample
 
 /*
  * start pipe
- * 1. Convert Unphased VCF to .gen.gz by chromosomes
- * 2. Split plink format into .gen by chromosomes
+ * 1. Split plink format into .gen by chromosomes
  */
 
 process plink {
@@ -187,7 +186,7 @@ imputeChromChunckChannel = shapeitChan.flatMap { chromosome, gensFile, sampleFil
    return results 
 }
 
-// 3. imputation
+// 2. imputation
 process impute2 {
   
   maxForks params.maxForks_impute2
@@ -245,55 +244,42 @@ impute2Map.each { chrom, fileList ->
 
 impute2MapChannel.close()
 
-infoList = infoChan.toSortedList() 
-infoList = infoList.val
-
-infoMap = [:]
-
-infoList.each { chrom, file ->
-
-  if ( !infoMap.containsKey(chrom) ) {
-   infoMap.put(chrom, [])
-  }
-  infoMap.get(chrom).add(file)
-
-}
-
-infoMapChannel = Channel.create()
-
-infoMap.each { chrom, fileList ->
-  infoMapChannel.bind([chrom, fileList])
-}
-
-infoMapChannel.close()
-
-// 4. concat impute2 results for per chromosome
+// 3. concat impute2 results for per chromosome
 process impute2Concat {
   
-  publishDir params.output_dir, overwrite:true, mode:'link'
  
   input:
   set val(chromosome), file(imputedFiles) from impute2MapChannel
 
   output:
-  set val(chromosome), file("chr${chromosome}_1KG.imputed") into impute2ConcatChan
+  set val(chromosome), file("chr${chromosome}_1KG.gen") into impute2ConcatChan
 
   """
-  cat $imputedFiles > chr${chromosome}_1KG.imputed
+  cat $imputedFiles > chr${chromosome}_1KG.gen
   """
 }
 
-process impute2infoConcat {
+// 4. Convert gen file to bgen file
+
+impute2ConcatChan
+ .toSortedList( { a, b -> a[0] <=> b[0] } ) 
+ .flatten()
+ .buffer( size:1, skip:1 )
+ .flatMap{it.get(0)}
+ .toList()
+ .set{res}
+
+process gen2bgen {
   
   publishDir params.output_dir, overwrite:true, mode:'link'
  
   input:
-  set val(chromosome), file(infoFiles) from infoMapChannel
+  file(genFiles) from res
 
   output:
-  set val(chromosome), file("chr${chromosome}_1KG.imputed_info") into impute2infoConcatChan
+  file("${params.plink_prefix}.bgen") into bgenChan
 
   """
-  cat $infoFiles > chr${chromosome}_1KG.imputed_info
+  qctool -g chr#_1KG.gen -og ${params.plink_prefix}.bgen
   """
 }

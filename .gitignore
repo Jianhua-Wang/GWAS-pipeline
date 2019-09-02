@@ -1,7 +1,7 @@
 .git/
 .nextflow*
 work/
-# /output/*
+/output/imputation/test-nd-c-c.bgen
 /input/*
 .DS_Store
 ._*
