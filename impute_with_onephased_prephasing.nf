@@ -277,9 +277,9 @@ process gen2bgen {
   file(genFiles) from res
 
   output:
-  file("${params.plink_prefix}.bgen") into bgenChan
+  file("${params.input_pat}.bgen") into bgenChan
 
   """
-  qctool -g chr#_1KG.gen -og ${params.plink_prefix}.bgen
+  qctool -g chr#_1KG.gen -og ${params.input_pat}.bgen
   """
 }

@@ -55,7 +55,7 @@ I referred to the *Nature Protocols* from [Anderson et al.](<https://www.nature.
 
 ### Input
 
-PLINK binary .bed, .bim, and .fam file
+PLINK binary .bed, .bim, and .fam file (10 sample)
 
 There are various types of genotype formats, such as PLINK bed, gen, vcf, bgen, even pgen. You can find the description of them on [PLINK's website](https://www.cog-genomics.org/plink/1.9/formats). In this part, we mainly use PLINK bed format, which contains a [bed](https://www.cog-genomics.org/plink/1.9/formats#bed) file for genotype, a [bim](https://www.cog-genomics.org/plink/1.9/formats#bim) file for variant information, and a [fam](https://www.cog-genomics.org/plink/1.9/formats#fam) file for individual information, with the same prefix.
 
@@ -89,7 +89,7 @@ nextflow run qc.nf -c qc.config
 
 One can adjust the parameters such as prefix of input PLINK file, path of output file, and the cutoff of MAF modifying the `qc.config` file:
 
-```json
+```
 params {
 
     work_dir = "/$PWD"
@@ -121,13 +121,44 @@ This command changed the path of output file. You can find a new folder named `q
 
 :star: The `bin` folder is the default environmental variable of NEXTFLOW, so I just put the stable version of used tools in `bin` folder instead of using a script to set up.
 
+The stdout of NEXTFLOW looks like:
+
+```shell
+(gwas) ➜  GWAS-pipeline git:(master) ✗ nextflow run qc.nf -c qc.config           
+N E X T F L O W  ~  version 0.30.1
+Launching `qc.nf` [elated_easley] - revision: 16c33dbc96
+[warm up] executor > local
+[38/981164] Submitted process > identifyIndivDiscSexinfo (1)
+[ea/0f8c22] Submitted process > getDuplicateMarkers (1)
+[21/126daf] Submitted process > showHWEStats (1)
+[f9/69193c] Submitted process > removeDuplicateSNPs (1)
+[aa/ce6083] Submitted process > getInitMAF (1)
+[2a/0c7329] Submitted process > removeQCPhase1 (1)
+[99/6104a7] Submitted process > generateIndivMissingnessPlot (1)
+[bb/9f881b] Submitted process > generateSnpMissingnessPlot (1)
+[fe/33324b] Submitted process > showInitMAF (1)
+[ff/38d030] Submitted process > calculateSampleHeterozygosity (1)
+[a7/f6167b] Submitted process > pruneForIBD (1)
+[12/a1cd0a] Submitted process > compPCA (1)
+[b0/4c675a] Submitted process > getBadIndivsMissingHet (1)
+[b7/c9ea9e] Submitted process > generateMissHetPlot (1)
+[fa/1ef8f2] Submitted process > findRelatedIndiv (1)
+[ee/217c0c] Submitted process > removeQCIndivs (1)
+[56/6f17db] Submitted process > drawPCA (1)
+[c5/ab2f2d] Submitted process > calculateMaf (1)
+[7f/307d0a] Submitted process > generateHwePlot (1)
+[2b/7eb74b] Submitted process > generateMafPlot (1)
+[b3/fdb024] Submitted process > produceReports (1)
+The output report is called //f/jianhua/jianhua_pipeline/GWAS-pipeline/output/qc/test-GWAS-QC_report.html
+```
+
 ### Main steps
 
 There are 21 steps in this QC pipeline and I wrote them in NEXTFLOW and lots of Python scripts, so it's not possible to explain each step clearly here. To understand the details in the pipeline, you need to be proficient in PLINK, NEXTFLOW and Python.
 
 Here I use a simple example to demonstrate how the NEXTFLOW works.
 
-```json
+```
 process calculateMaf {
     input:
         file(plinks) from qc3A_ch
@@ -190,7 +221,7 @@ nextflow run impute_with_onephased_prephasing.nf -c impute_with_onephased_prepha
 
 the parameters in configuration file are most fixed parameters:
 
-```json
+```
 params {
 
     work_dir = "/$PWD" 
@@ -228,18 +259,7 @@ In the test example, I only imputed chr21 and chr22. You can replace [21,22] wit
 
 ### Main steps
 
-```mermaid
-graph LR
-A[PLINK bed] -->G(gen file)
-G[gen file] -->B(pre-phasing)
-B --> C{IMPUTE2}
-C -->D[chunk1]
-C -->H[...]
-C -->E[chunk2]
-D[chunk1] --> F[bgen file]
-H[......] --> F[bgen file]
-E[chunkN] --> F[bgen file]
-```
+![](imputation_mermaid.png)
 
 As the graph shows, I split the input plink format into .gen by chromosomes, then impute under every 5,000,000 BP bin and merge the results of chromosomes, finally, convert the gen format files into bgen format.
 
@@ -247,4 +267,41 @@ This parallel strategy is easy to implement in NEXTFLOW, however, imputation wil
 
 ## <a name="2"></a>Association analysis
 
-fda
+### Purpose
+
+As for association test, we reviewed lots of GWAS quantitative traits and summarize the association model they used. The most used and the earliest is generalized linear model, which is applied in PLINK and hail. Hail is a python module developed by Board institute. Different with GLM, mixed linear model involves the concept of random effect which is in estimated by genetic relationship matrix. And GCTA is one of the representative tools.  As the imputation becoming mainstream, many GWAS use SNPTEST which was also developed by Marchini. It's based on a missing data likelihood theory, fully accounting for the uncertainty in genotypes.
+
+### Input
+
+1. results of imputation (bgen format)
+2. information of sample: ID, phenotypes, covariates (sample format)
+
+```shell
+cat test-nd-c-c.sample 
+ID_1 ID_2 missing tiv age height sex
+0 0 0 P C C D
+1 1 0 108.0722466 -2.652660473 13.5794709 1
+2 2 0 -114.0377534 0.34733952700000004 -11.4205291 2
+3 3 0 -253.3277534 -1.652660473 -3.420529101 1
+4 4 0 -191.7477534 -2.652660473 -4.420529101 2
+5 5 0 -31.82775338 -3.652660473 -2.420529101 2
+6 6 0 99.66224662 3.347339527 0.579470899 1
+7 7 0 -58.59775338 -0.652660473 1.579470899 1
+8 8 0 82.21224662 0.34733952700000004 5.579470899 2
+9 9 0 96.32224662 -2.652660473 9.579470899 1
+10 10 0 197.96224660000001 3.347339527 -1.420529101 2
+```
+
+Above is the sample file I used in the example. This format has a two-line head and the first three are always ID_1, ID_2 and missing. Column `missing` is missing rate of every individual and I fill it with zero because SNPTEST will calculate by itself instead of using this column. `tiv` is the interested phenotype while the second line is "P" for "Phenotype". And I used age, height, and sex as covariates. In second head, continuous covariates are represented by 'C' while discrete covariates are represented by 'D'.
+
+### Output
+
+Summary statistics and a PDF file with Manhattan plot and qq plot.
+
+### Usage
+
+```shell
+conda activate gwas
+nextflow run snptest_frequentist.nf -c snptest_frequentist.config
+conda deactivate
+```
