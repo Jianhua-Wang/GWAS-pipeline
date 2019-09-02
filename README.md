@@ -61,5 +61,22 @@ There are various types of genotype formats, such as PLINK bed, gen, vcf, bgen, 
 
 ### Output
 
-This pipeline does not only output the clean data but also generate tables of filtered variants and individuals and figures of data assessment. I put the tables and figures in a HTML report to reading easily.
+This pipeline does not only output the clean data but also generate tables of filtered variants and individuals and figures of data assessment. I put the tables and figures in a HTML report to read easily.
+
+| Output file              | Description                                       |
+| ------------------------ | ------------------------------------------------- |
+| test-nd-c-c.bim          | bim file of clean data                            |
+| test-nd-c-c.bed          | bed file of clean data                            |
+| test-nd-c-c.fam          | fam file of clean data                            |
+| test.dups                | duplicated variants                               |
+| test.badsex              | sample with ambiguous sex                         |
+| test-nd-c.irem           | removed sample due to missing rate                |
+| test-nd-fail_IBD.txt     | related sample                                    |
+| test-nd-c-fail_het.txt   | sample with extreme high or low heterozygous rate |
+| test-nd-c-c.irem         | sample removed in phased 3                        |
+| test-GWAS-QC_report.html | report of QC                                      |
+| test_runtime.html        | report of workflow running                        |
+| test_timeline.html       | report of workflow running                        |
+
+### Usage
 
