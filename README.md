@@ -80,3 +80,171 @@ This pipeline does not only output the clean data but also generate tables of fi
 
 ### Usage
 
+To run GWAS QC pipeline on the test data in `input` folder, just activate conda environment and use:
+
+```shell
+conda activate gwas
+nextflow run qc.nf -c qc.config
+```
+
+One can adjust the parameters such as prefix of input PLINK file, path of output file, and the cutoff of MAF modifying the `qc.config` file:
+
+```json
+params {
+
+    work_dir = "/$PWD"
+    input_dir = "${params.work_dir}/input"
+    output_dir = "${params.work_dir}/output/qc"
+    input_pat = "test"
+
+    pca_ref_dir = "./pca_ref/"
+    pca_ref_pat = "hapmap3_pca"
+
+    cut_maf = 0.0001
+    cut_mind = 0.03
+    cut_geno = 0.05
+    cut_hwe = 0.00001
+    pi_hat = 0.1875
+    f_lo_male = 0.8
+    f_hi_female = 0.2
+    times_of_meanhet = 3
+}
+```
+
+or use the command line directly, like:
+
+```shell
+nextflow run qc.nf -c qc.config --output_dir qc1 --cut_maf 0.01
+```
+
+This command changed the path of output file. You can find a new folder named `qc1` was created in `output` folder and the clean data is with MAF >= 0.01.
+
+:star: The `bin` folder is the default environmental variable of NEXTFLOW, so I just put the stable version of used tools in `bin` folder instead of using a script to set up.
+
+### Main steps
+
+There are 21 steps in this QC pipeline and I wrote them in NEXTFLOW and lots of Python scripts, so it's not possible to explain each step clearly here. To understand the details in the pipeline, you need to be proficient in PLINK, NEXTFLOW and Python.
+
+Here I use a simple example to demonstrate how the NEXTFLOW works.
+
+```json
+process calculateMaf {
+    input:
+        file(plinks) from qc3A_ch
+
+    output:
+        file "${base}.frq" into maf_plot_ch
+        file "${base}.hwe" into hwe_scores_ch
+
+    script:
+        base = plinks[0].baseName
+        out  = base.replace(".","_")
+        """
+        plink --bfile $base --hardy --freq --out $out
+        """
+}
+```
+
+In NEXTFLOW, a single step is defined as a `process`. Every `process` has three sections: input, output, and script. The input file of every step is loaded in input section and the output file are pull out to other channels using wildcard. In script section, I used `--hardy` and `--freq` to calculate the HWE and MAF.
+
+---
+
+## <a name="2"></a>Imputation
+
+### Purpose
+
+Genotype imputation is a statistical technique that is often used to increase the power and resolution of genetic association studies. Imputation methods work by using haplotype patterns in a reference panel, such as the 1000 Genomes Project (1000G) to predict unobserved genotypes in a study dataset.
+
+### Reference
+
+I used the reference panel constructed by IMPUTE2. You can download the files using:
+
+```shell
+cd impute_ref
+bash 01_prepare_reference.sh
+```
+
+### Input
+
+The input files of imputation are the output files of QC pipeline which are PLINK bed format.
+
+### Output
+
+The original output of IMPUTE2 is .gen format which is readable and takes up lots of space. So I convert the .gen format to the .bgen format which is far small then .gen format and very fast to read using [qctool](<https://www.well.ox.ac.uk/~gav/qctool_v2/index.html>).
+
+```shell
+(gwas) ➜  imputation git:(master) ✗ ll
+total 180M
+-rw-rw-r-- 2 jianhua jianhua 177M 9月   2 19:56 test-nd-c-c.bgen
+-rw-rw-r-- 1 jianhua jianhua 2.9M 9月   2 19:56 test-nd-c-c_runtime.html
+-rw-rw-r-- 1 jianhua jianhua  15K 9月   2 19:56 test-nd-c-c_timeline.html
+```
+
+### Usage
+
+Same as the usage of QC pipeline, it's very easy to run this pipeline:
+
+```shell
+nextflow run impute_with_onephased_prephasing.nf -c impute_with_onephased_prephasing.config
+```
+
+the parameters in configuration file are most fixed parameters:
+
+```json
+params {
+
+    work_dir = "/$PWD" 
+    output_dir = "${params.work_dir}/output/imputation"
+
+    input_dir = "${params.work_dir}/input"
+    input_pat = "test"
+    
+    chromosomes_List = [21,22]
+    chromosomeSizesFile = "./hg19_chromosomes_size/hg19_chromosomes_size.txt"
+
+    map_dir = "./impute_ref/1000GP_Phase3/"
+    map_pattern = "genetic_map_chr%s_combined_b37.txt"
+
+    ref_panel_dir = "./impute_ref/1000GP_Phase3/"
+    ref_hap_pattern = "1000GP_Phase3_chr%s.hap.gz"
+    ref_leg_pattern = "1000GP_Phase3_chr%s.legend.gz"
+    ref_sample = "1000GP_Phase3.sample"
+
+    maxForks_shapeit = 10
+    maxForks_impute2 = 20
+
+}
+```
+
+In the test example, I only imputed chr21 and chr22. You can replace [21,22] with 1..22 for autosomes imputation.
+
+:boom: I split file in every 5Mb bin for parallel running. You will get a error if there is no variant in this bin when using IMPUTE2. In order to ensure success, I have ignored such errors, the stdout looks like:
+
+```shell
+[1e/a15433] NOTE: Missing output file(s) `chr21-5000001-10000000.imputed` expected by process `impute2 (2)` -- Error is ignored
+[e8/0b9125] NOTE: Missing output file(s) `chr21-10000001-15000000.imputed` expected by process `impute2 (3)` -- Error is ignored
+[0d/448b04] NOTE: Missing output file(s) `chr22-50000001-51304566.imputed` expected by process `impute2 (21)` -- Error is ignored
+```
+
+### Main steps
+
+```mermaid
+graph LR
+A[PLINK bed] -->G(gen file)
+G[gen file] -->B(pre-phasing)
+B --> C{IMPUTE2}
+C -->D[chunk1]
+C -->H[...]
+C -->E[chunk2]
+D[chunk1] --> F[bgen file]
+H[......] --> F[bgen file]
+E[chunkN] --> F[bgen file]
+```
+
+As the graph shows, I split the input plink format into .gen by chromosomes, then impute under every 5,000,000 BP bin and merge the results of chromosomes, finally, convert the gen format files into bgen format.
+
+This parallel strategy is easy to implement in NEXTFLOW, however, imputation will produce many large files.
+
+## <a name="2"></a>Association analysis
+
+fda
