@@ -1,8 +1,10 @@
 .git/
 .nextflow*
 work/
-/output/imputation/test-nd-c-c.bgen
-/output/association/test-nd-c-c.score.txt.gz
+*.bgen
+*.score.txt.gz
 .DS_Store
+*timeline*
+*runtime*
 ._*
 /impute_ref/1000GP_Phase3/*

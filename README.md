@@ -280,16 +280,16 @@ As for association test, we reviewed lots of GWAS quantitative traits and summar
 cat test-nd-c-c.sample 
 ID_1 ID_2 missing tiv age height sex
 0 0 0 P C C D
-1 1 0 108.0722466 -2.652660473 13.5794709 1
-2 2 0 -114.0377534 0.34733952700000004 -11.4205291 2
-3 3 0 -253.3277534 -1.652660473 -3.420529101 1
-4 4 0 -191.7477534 -2.652660473 -4.420529101 2
-5 5 0 -31.82775338 -3.652660473 -2.420529101 2
-6 6 0 99.66224662 3.347339527 0.579470899 1
-7 7 0 -58.59775338 -0.652660473 1.579470899 1
-8 8 0 82.21224662 0.34733952700000004 5.579470899 2
-9 9 0 96.32224662 -2.652660473 9.579470899 1
-10 10 0 197.96224660000001 3.347339527 -1.420529101 2
+1 1 0 1 21 170 1
+2 2 0 2 22 171 2
+3 3 0 3 23 172 1
+4 4 0 4 24 173 2
+5 5 0 5 25 174 2
+6 6 0 6 26 175 1
+7 7 0 7 27 176 1
+8 8 0 8 28 177 2
+9 9 0 9 29 178 1
+10 10 0 10 30 179 2
 ```
 
 Above is the sample file I used in the example. This format has a two-line head and the first three are always ID_1, ID_2 and missing. Column `missing` is missing rate of every individual and I fill it with zero because SNPTEST will calculate by itself instead of using this column. `tiv` is the interested phenotype while the second line is "P" for "Phenotype". And I used age, height, and sex as covariates. In second head, continuous covariates are represented by 'C' while discrete covariates are represented by 'D'.
@@ -305,3 +305,9 @@ conda activate gwas
 nextflow run snptest_frequentist.nf -c snptest_frequentist.config
 conda deactivate
 ```
+
+---
+
+## Caution
+
+- 

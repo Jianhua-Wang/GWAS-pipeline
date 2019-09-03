@@ -114,8 +114,8 @@ process snptest {
   -o chr${chromosome}-${chunkStart}-${chunkEnd}.score \
   -method score \
   -frequentist 1 \
-  -pheno tiv \
-  -cov_names age height sex
+  -pheno ${params.phenotype} \
+  -cov_names ${params.covariates}
   sed -i '1,13d' chr${chromosome}-${chunkStart}-${chunkEnd}.score
   sed -i '\$d' chr${chromosome}-${chunkStart}-${chunkEnd}.score
   """
