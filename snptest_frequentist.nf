@@ -167,10 +167,27 @@ process snptestConcatChro {
   file(chroFiles) from snptestConcatChunkChan.collect()
 
   output:
-  file("${bgen_prefix}.score")
+  file("${bgen_prefix}.score.txt.gz") into snptest_out_ch
 
   script:
   """
-  cat *.score > ${bgen_prefix}.score
+  echo "alternate_ids rsid chromosome position alleleA alleleB index average_maximum_posterior_call info cohort_1_AA cohort_1_AB cohort_1_BB cohort_1_NULL all_AA all_AB all_BB all_NULL all_total all_maf missing_data_proportion frequentist_add_pvalue frequentist_add_info frequentist_add_beta_1 frequentist_add_se_1 comment" > head
+  cat head *.score > ${bgen_prefix}.score.txt
+  gzip -f ${bgen_prefix}.score.txt
   """
+}
+
+process manhattan_qq {
+
+  publishDir params.output_dir, overwrite:true, mode:'link'
+
+  input:
+  file(bgenie_out) from snptest_out_ch
+  
+  output:
+  file("${base}_Manhattan_QQ.png")
+  
+  script:
+  base = bgen_prefix
+  template "manhattan_qq_bgenie.py"
 }

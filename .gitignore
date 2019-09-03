@@ -2,8 +2,7 @@
 .nextflow*
 work/
 /output/imputation/test-nd-c-c.bgen
-/output/association/test-nd-c-c.score
-/input/*
+/output/association/test-nd-c-c.score.txt.gz
 .DS_Store
 ._*
 /impute_ref/1000GP_Phase3/*

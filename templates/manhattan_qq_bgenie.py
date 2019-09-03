@@ -79,12 +79,12 @@ def manhattan(df,ax):
 if len(sys.argv)<=1:
     sys.argv="manhattan_qq_bgenie.py $base".split()
 
-path = '{}.txt.gz'.format(sys.argv[1])
-p,bp,chr_name = '-log10p','pos','chr'
+path = '{}.score.txt.gz'.format(sys.argv[1])
+p,bp,chr_name = 'frequentist_add_pvalue','position','chromosome'
 df = pd.read_csv(path,sep=' ')
 df = df[df[p].notnull()]
 df[chr_name] = df[chr_name].astype(int)
-df[p] = [10**(-x) for x in df[p].values]
+# df[p] = [10**(-x) for x in df[p].values]
 
 figure_tile = sys.argv[1]
 fig = plt.figure(figsize=(24, 6))
