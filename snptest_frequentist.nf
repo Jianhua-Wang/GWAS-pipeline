@@ -5,7 +5,7 @@
  * Date      :   10-27-2018
  *
  *
- * This is a pipeline for association tese using SNPTEST
+ * This is a pipeline for association test using SNPTEST
  * 
  * 
  * INPUT     :   bgen format (.bgen,.sample) after imputation
