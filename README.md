@@ -25,7 +25,15 @@ git clone https://github.com/Jianhua-Wang/GWAS-pipeline.git
 then set up the conda environment:
 
 ```shell
-conda env create -f ./bin/gwascondaenv.yml
+# create conda environment
+cd bin
+conda env create -f gwascondaenv.yml
+
+# download qctool which is too big to upload to GitHub
+wget -c https://www.well.ox.ac.uk/~gav/resources/qctool_v2.0.1-Ubuntu14.04-x86_64.tgz
+tar -zxvf qctool_v2.0.1-Ubuntu14.04-x86_64.tgz
+mv ./qctool_v2.0.1-Ubuntu14.04-x86_64/qctool ./
+rm -rf qctool_v2.0.1-Ubuntu14.04-x86_64*
 ```
 
 and use the commands below to activate/deactivate the environment:
@@ -310,4 +318,12 @@ conda deactivate
 
 ## Caution
 
-- 
+- In PCA of QC section, I used hapmap3 as the background. So the PCA is based on the overlapped variants between hapmap3 and input data. Sometimes it will report an error if the overlapped variants has inconsistent alleles, so make sure your variants are all forward strand, which is also important in imputation.
+- In imputation section, I only imputed the variants in autosomes because the association analysis of chrX is complicated, although imputation on chrX is possible.
+- You will got nothing on the manhattan plot and qq plot, and the P-value in results are all NA, cause SNPTEST requires at least 100 sample but we only have 10 in the test data. You will see the correct results with true data.
+
+## Reference
+
+1. Anderson, C. A., Pettersson, F. H., Clarke, G. M., Cardon, L. R., Morris, A. P., & Zondervan, K. T. (2010). Data quality control in genetic case-control association studies. *Nature Protocols*, *5*(9), 1564–1573. https://doi.org/10.1038/nprot.2010.116
+2. Van Leeuwen, E. M., Kanterakis, A., Deelen, P., Kattenberg, M. V., Slagboom, P. E., De Bakker, P. I. W., … Hottenga, J. J. (2015). Population-specific genotype imputations using minimac or IMPUTE2. *Nature Protocols*, *10*(9), 1285–1296. https://doi.org/10.1038/nprot.2015.077
+3. Clarke, G. M., Anderson, C. A., Pettersson, F. H., Cardon, L. R., Morris, A. P., & Zondervan, K. T. (2011). Basic statistical analysis in genetic case-control studies. *Nature Protocols*, *6*(2), 121–133. https://doi.org/10.1038/nprot.2010.182
