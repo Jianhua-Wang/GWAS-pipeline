@@ -82,31 +82,13 @@ function c0(index) { return "#9c9c9c"; }
 function c1(index) { return "#bdbdbd"; }
 function c2(index) { return colors[index % 16]; } // <-- note: uses only the first 16 colors
 
-var elapsed="32.5s"
-var beginningMillis=1567431393575;
-var endingMillis=1567431426115;
+var elapsed="3.3s"
+var beginningMillis=1567649850977;
+var endingMillis=1567649854229;
 var data=[
-{"label": "identifyIndivDiscSexinfo (1)", "times": [{"starting_time": 1567431394365, "ending_time": 1567431394389, "color":c1(0)}, {"starting_time": 1567431394389, "ending_time": 1567431394630, "color":c2(0), "label": "355ms \/ 93.8 GB"}, {"starting_time": 1567431394630, "ending_time": 1567431394720, "color":c1(0)}]},
-{"label": "getDuplicateMarkers (1)", "times": [{"starting_time": 1567431394385, "ending_time": 1567431394393, "color":c1(1)}, {"starting_time": 1567431394393, "ending_time": 1567431398616, "color":c2(1), "label": "5.6s \/ 27.1 MB"}, {"starting_time": 1567431398616, "ending_time": 1567431399981, "color":c1(1)}]},
-{"label": "showHWEStats (1)", "times": [{"starting_time": 1567431394765, "ending_time": 1567431394821, "color":c1(2)}, {"starting_time": 1567431394821, "ending_time": 1567431399689, "color":c2(2), "label": "5.6s \/ 66.9 MB"}, {"starting_time": 1567431399689, "ending_time": 1567431400367, "color":c1(2)}]},
-{"label": "removeDuplicateSNPs (1)", "times": [{"starting_time": 1567431399998, "ending_time": 1567431400081, "color":c1(3)}, {"starting_time": 1567431400081, "ending_time": 1567431400308, "color":c2(3), "label": "377ms \/ 93.8 GB"}, {"starting_time": 1567431400308, "ending_time": 1567431400375, "color":c1(3)}]},
-{"label": "getInitMAF (1)", "times": [{"starting_time": 1567431400393, "ending_time": 1567431400476, "color":c1(4)}, {"starting_time": 1567431400476, "ending_time": 1567431400737, "color":c2(4), "label": "413ms \/ 93.8 GB"}, {"starting_time": 1567431400737, "ending_time": 1567431400806, "color":c1(4)}]},
-{"label": "removeQCPhase1 (1)", "times": [{"starting_time": 1567431400402, "ending_time": 1567431400478, "color":c1(5)}, {"starting_time": 1567431400478, "ending_time": 1567431401301, "color":c2(5), "label": "5.9s \/ 93.8 GB"}, {"starting_time": 1567431401301, "ending_time": 1567431406295, "color":c1(5)}]},
-{"label": "generateIndivMissingnessPlot (1)", "times": [{"starting_time": 1567431400406, "ending_time": 1567431400479, "color":c1(6)}, {"starting_time": 1567431400479, "ending_time": 1567431401497, "color":c2(6), "label": "5.7s \/ 2.1 GB"}, {"starting_time": 1567431401497, "ending_time": 1567431406124, "color":c1(6)}]},
-{"label": "generateSnpMissingnessPlot (1)", "times": [{"starting_time": 1567431400409, "ending_time": 1567431400480, "color":c1(7)}, {"starting_time": 1567431400480, "ending_time": 1567431401580, "color":c2(7), "label": "5.7s \/ 2.1 GB"}, {"starting_time": 1567431401580, "ending_time": 1567431406130, "color":c1(7)}]},
-{"label": "showInitMAF (1)", "times": [{"starting_time": 1567431400832, "ending_time": 1567431400906, "color":c1(8)}, {"starting_time": 1567431400906, "ending_time": 1567431401988, "color":c2(8), "label": "5.7s \/ 2.2 GB"}, {"starting_time": 1567431401988, "ending_time": 1567431406500, "color":c1(8)}]},
-{"label": "calculateSampleHeterozygosity (1)", "times": [{"starting_time": 1567431406318, "ending_time": 1567431406395, "color":c1(9)}, {"starting_time": 1567431406395, "ending_time": 1567431406550, "color":c2(9), "label": "366ms \/ 93.8 GB"}, {"starting_time": 1567431406550, "ending_time": 1567431406684, "color":c1(9)}]},
-{"label": "pruneForIBD (1)", "times": [{"starting_time": 1567431406323, "ending_time": 1567431406396, "color":c1(10)}, {"starting_time": 1567431406396, "ending_time": 1567431406906, "color":c2(10), "label": "599ms \/ 93.8 GB"}, {"starting_time": 1567431406906, "ending_time": 1567431406922, "color":c1(10)}]},
-{"label": "compPCA (1)", "times": [{"starting_time": 1567431406327, "ending_time": 1567431406397, "color":c1(11)}, {"starting_time": 1567431406397, "ending_time": 1567431408557, "color":c2(11), "label": "5.9s \/ 93.8 GB"}, {"starting_time": 1567431408557, "ending_time": 1567431412207, "color":c1(11)}]},
-{"label": "getBadIndivsMissingHet (1)", "times": [{"starting_time": 1567431406706, "ending_time": 1567431406784, "color":c1(12)}, {"starting_time": 1567431406784, "ending_time": 1567431407353, "color":c2(12), "label": "637ms \/ 2.1 GB"}]},
-{"label": "generateMissHetPlot (1)", "times": [{"starting_time": 1567431406711, "ending_time": 1567431406785, "color":c1(13)}, {"starting_time": 1567431406785, "ending_time": 1567431408564, "color":c2(13), "label": "5.8s \/ 2.1 GB"}, {"starting_time": 1567431408564, "ending_time": 1567431412534, "color":c1(13)}]},
-{"label": "findRelatedIndiv (1)", "times": [{"starting_time": 1567431406962, "ending_time": 1567431407023, "color":c1(14)}, {"starting_time": 1567431407023, "ending_time": 1567431407531, "color":c2(14), "label": "577ms \/ 2.1 GB"}, {"starting_time": 1567431407531, "ending_time": 1567431407539, "color":c1(14)}]},
-{"label": "removeQCIndivs (1)", "times": [{"starting_time": 1567431407572, "ending_time": 1567431407640, "color":c1(15)}, {"starting_time": 1567431407640, "ending_time": 1567431408252, "color":c2(15), "label": "5.8s \/ 2 GB"}, {"starting_time": 1567431408252, "ending_time": 1567431413346, "color":c1(15)}]},
-{"label": "drawPCA (1)", "times": [{"starting_time": 1567431412236, "ending_time": 1567431412307, "color":c1(16)}, {"starting_time": 1567431412307, "ending_time": 1567431413049, "color":c2(16), "label": "5.7s \/ 2.2 GB"}, {"starting_time": 1567431413049, "ending_time": 1567431417923, "color":c1(16)}]},
-{"label": "calculateMaf (1)", "times": [{"starting_time": 1567431413363, "ending_time": 1567431413444, "color":c1(17)}, {"starting_time": 1567431413444, "ending_time": 1567431413711, "color":c2(17), "label": "368ms \/ 93.8 GB"}, {"starting_time": 1567431413711, "ending_time": 1567431413731, "color":c1(17)}]},
-{"label": "generateHwePlot (1)", "times": [{"starting_time": 1567431413753, "ending_time": 1567431413831, "color":c1(18)}, {"starting_time": 1567431413831, "ending_time": 1567431415026, "color":c2(18), "label": "5.7s \/ 2.2 GB"}, {"starting_time": 1567431415026, "ending_time": 1567431419434, "color":c1(18)}]},
-{"label": "generateMafPlot (1)", "times": [{"starting_time": 1567431413757, "ending_time": 1567431413832, "color":c1(19)}, {"starting_time": 1567431413832, "ending_time": 1567431414904, "color":c2(19), "label": "5.7s \/ 2.1 GB"}, {"starting_time": 1567431414904, "ending_time": 1567431419440, "color":c1(19)}]},
-{"label": "produceReports (1)", "times": [{"starting_time": 1567431419482, "ending_time": 1567431419540, "color":c1(20)}, {"starting_time": 1567431419540, "ending_time": 1567431420084, "color":c2(20), "label": "5.8s \/ 2 GB"}, {"starting_time": 1567431420084, "ending_time": 1567431425240, "color":c1(20)}]}
+{"label": "identifyIndivDiscSexinfo (1)", "times": [{"starting_time": 1567649851782, "ending_time": 1567649851806, "color":c1(0)}, {"starting_time": 1567649851806, "ending_time": 1567649852140, "color":c2(0), "label": "487ms \/ 93.8 GB"}, {"starting_time": 1567649852140, "ending_time": 1567649852269, "color":c1(0)}]},
+{"label": "getDuplicateMarkers (1)", "times": [{"starting_time": 1567649851799, "ending_time": 1567649851810, "color":c1(1)}]},
+{"label": "showHWEStats (1)", "times": [{"starting_time": 1567649852318, "ending_time": 1567649852368, "color":c1(2)}]}
 ]
 
 
