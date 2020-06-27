@@ -17,13 +17,14 @@ gap = EOL*3
 def parseArguments():
     if len(sys.argv)<=1:
         sys.argv=\
-        "drawPCA.py $base $eigvals $eigvecs $output $pop_file".split()
+        "drawPCA.py $base $eigvals $eigvecs $output $pop_file $pca_legend_label".split()
     parser=argparse.ArgumentParser()
     parser.add_argument('input', type=str, metavar='input'),
     parser.add_argument('eigvals', type=str, metavar='label'),
     parser.add_argument('eigvecs', type=str, metavar='output'),
     parser.add_argument('output', type=str, metavar='output'),
-    parser.add_argument('pop_file',type=str, metavar='pop_file')
+    parser.add_argument('pop_file',type=str, metavar='pop_file'),
+    parser.add_argument('pca_legend_label',type=str, metavar='pca_legend_label'),
     args = parser.parse_args()
     return args
 args = parseArguments()
@@ -37,9 +38,9 @@ top_2 = df[[0,1,2,3]]
 
 pop_df = pd.read_csv(args.pop_file,delim_whitespace=True,names=[1,2,3,4,5,6])
 merge_df = top_2.merge(pop_df,left_on=1,right_on=2,how='outer')
-merge_df = merge_df.fillna(value=args.input[:-11])
+merge_df = merge_df.fillna(value=args.pca_legend_label)
 
-sample_df = merge_df[merge_df[6] == args.input[:-11]]
+sample_df = merge_df[merge_df[6] == args.pca_legend_label]
 ceu_df = merge_df[merge_df[6] == 'CEU']
 chb_df = merge_df[merge_df[6] == 'CHB']
 jpt_df = merge_df[merge_df[6] == 'JPT']

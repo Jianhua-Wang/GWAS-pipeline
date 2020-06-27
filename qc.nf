@@ -53,6 +53,7 @@ repnames.each { report[it] = Channel.create() }
 pca_ref_ch = Channel.create()
 pop_ch = Channel.create()
 pca_ref = "${params.pca_ref_dir}/${params.pca_ref_pat}"
+pca_legend_label = params.pca_legend_label
 Channel
     .fromFilePairs("${pca_ref}.{bed,bim,fam}", size:3, flat : true){ file -> file.baseName }\
     .ifEmpty { error "No matching pca-ref files" }\
